@@ -2,6 +2,13 @@ var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; 
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
+var express = require('express');
+var app = express();
+var server = require('http').createServer(app);
+var io = require('socket.io').listen(server);
+
+
+
 
 // queue of messages to be sent to the pelletkachel
 var queue = [];
@@ -63,16 +70,18 @@ eventEmitter.on('smscommand',function(data) {
     queue.push(data);    
 });
 
-// two event listeners for testing purposes 
-eventEmitter.on('pelletkachel', function(data) {
-    console.log("event1: " + data.operatingmode);
-});
-eventEmitter.on('pelletkachel', function(data) {
-    console.log("event2: " + data.temperature);
-});
-
-
 setInterval(function(){
     console.log("timed event");
     eventEmitter.emit('smscommand',"***i");    
 },15000);
+
+// start webserver
+app.use(express.static(__dirname + '/public'));
+server.listen(8080);
+
+// forward everything to the socket
+io.sockets.on('connection', function (socket) {    
+    eventEmitter.on('pelletkachel', function(data) {
+	socket.emit('pelletkachel', data);
+    });
+});
