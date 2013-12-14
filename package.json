@@ -2,7 +2,7 @@
   "name": "PelletControl",
   "version": "0.0.1",
   "description": "Remote control ",
-  "author": "Pieter Meulenhoff <pieter@meulenhoff.org>"
+  "author": "Pieter Meulenhoff <pieter@meulenhoff.org>",
   "repository": {
     "type": "git",
     "url": "git://github.com/pieterjm/PelletControl.git"
@@ -14,6 +14,6 @@
   },
   "dependencies": {
     "serialport": "~1.2.5"
-  },
+  }
 }
 
