@@ -1,6 +1,7 @@
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; 
-
+var events = require('events');
+var eventEmitter = new events.EventEmitter();
 
 var queue = [];
 
@@ -16,7 +17,7 @@ var serialPort = new SerialPort("/dev/ttyUSB0",{
 serialPort.on("open", function () {
     console.log('open');
     serialPort.on('data', function(data) {
-
+	var result = undefined;
 	
 
 	console.log("RECV: " + data);
@@ -42,17 +43,30 @@ serialPort.on("open", function () {
 		serialPort.write("+CMGR: 0,,0\rOK\r");
 		console.log("SEND: +CMGR: 0");
 	    }
-	} else if ( result = data.match(/^oper\.mode\ (\S+),\ mode\ (\S+),\ temp\.actual\ (\d+)\ deg/) ) {
+	} else if ( result = data.match(/^oper\.mode\ ([^,]+),\ mode\ ([^,]+),\ temp\.actual\ (\d+)\ deg/) ) {
 	    console.log("Operating mode: " + result[1]);
 	    console.log("mode: " + result[2]);
 	    console.log("temperature: " + result[3]);
+
+	    // emit event
+	    eventEmitter.emit('pelletkachel',{operatingmode: result[1], mode: result[2], temperature: result[3]});
+
 	} else if ( /^at\+cmgs=\d+$/.test(data) ) {
 	    serialPort.write("+CMGS: 1\rOK\r");
 	    console.log("SEND: +CMGS OK");
 	} else {
-	    console.log("Unexpected data: " + data);
+	    console.log("PROBLEM: Unexpected data: " + data);
 	}
     });
+});
+
+
+// two event listeners for testing purposes 
+eventEmitter.on('pelletkachel', function(data) {
+    console.log("event1: " + data.operatingmode);
+});
+eventEmitter.on('pelletkachel', function(data) {
+    console.log("event2: " + data.temperature);
 });
 
 

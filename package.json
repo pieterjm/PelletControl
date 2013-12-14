@@ -13,7 +13,7 @@
     "node": ">= 0.10"
   },
   "dependencies": {
-    "serialport": "~1.2.5"
+    "serialport": "~1.2.5",
   }
 }
 
