@@ -3,9 +3,9 @@ var SerialPort = serialport.SerialPort;
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
+// queue of messages to be sent to the pelletkachel
 var queue = [];
 
-// 
 // pas zonodig het seriele device en de baudrate aan
 var serialPort = new SerialPort("/dev/ttyUSB0",{
     baudrate: 19200,
@@ -19,7 +19,6 @@ serialPort.on("open", function () {
     serialPort.on('data', function(data) {
 	var result = undefined;
 	
-
 	console.log("RECV: " + data);
 
 	if ( /^at$/.test(data) ) {
@@ -60,6 +59,9 @@ serialPort.on("open", function () {
     });
 });
 
+eventEmitter.on('smscommand',function(data) {
+    queue.push(data);    
+});
 
 // two event listeners for testing purposes 
 eventEmitter.on('pelletkachel', function(data) {
@@ -72,5 +74,5 @@ eventEmitter.on('pelletkachel', function(data) {
 
 setInterval(function(){
     console.log("timed event");
-    queue.push("***i");    
-},30000);
+    eventEmitter.emit('smscommand',"***i");    
+},15000);
