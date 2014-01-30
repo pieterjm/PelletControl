@@ -26,7 +26,7 @@
     <div class="mblSimpleDialogTitle">Operating mode</div>
     <div class="mblSimpleDialogText">Selecteer gewenste modus</div>
     <div data-dojo-type="dojox.mobile.ValuePicker">
-      <div id="pickermode" data-dojo-type="dojox.mobile.ValuePickerSlot" data-dojo-props="labels:['Off','Auto','Heating']"></div>
+      <div id="pickermode" data-dojo-type="dojox.mobile.ValuePickerSlot" data-dojo-props="labels:['Off','Auto','Heat']"></div>
     </div>
     <div style="background-color:#bdbabd;margin-top:6px;">
       <span data-dojo-type="dojox.mobile.ToolBarButton" class="dlgBtn" id="dlg_button_setoperatingmode" onclick="setOperatingmode()">Set</span>
@@ -34,11 +34,11 @@
     </div>
   </div>
   <div id="home" data-dojo-type="dojox.mobile.View" data-dojo-props='selected:true'>
-    <h1 data-dojo-type="dojox.mobile.Heading"  data-dojo-props='back:"Back"'>Pelletkachel</h1>
+    <h1 data-dojo-type="dojox.mobile.Heading">Pelletkachel</h1>
     <ul data-dojo-type="dojox.mobile.EdgeToEdgeList">
       <li data-dojo-type="dojox.mobile.ListItem">
-	<div layout="left">Temperatuur</div>
-	<div layout="right"><span id="TEMPERATURE">--</span>&deg;C
+	<div layout="left">Thermostat</div>
+	<div layout="right"><span id="SETTEMP">--</span>&deg;C
 	  <button data-dojo-type="dojox.mobile.Button" onclick="settemp_dialog();">Change</button>
 	</div>
       </li>
@@ -55,8 +55,8 @@
 	</div>
       </li>
       <li data-dojo-type="dojox.mobile.ListItem">
-	<div layout="left">Temp set</div>
-	<div layout="right"><span id="SETTEMP">--</span>&deg;C</div>
+	<div layout="left">Temperatuur</div>
+	<div layout="right"><span id="TEMPERATURE">--</span>&deg;C</div>
       </li>
     </ul>
   </div>

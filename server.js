@@ -13,6 +13,10 @@ posix.openlog('pelletcontrol', { cons: true, ndelay: true, pid: true }, 'local0'
 posix.syslog('info', 'pelletcontrol started');
 
 
+var currentTemp = "--";
+var currentOMode = "--";
+var currentMode = "--";
+var currentSetTemp = "--";
 
 // queue of messages to be sent to the pelletkachel
 var queue = [];
@@ -26,7 +30,7 @@ var serialPort = new SerialPort("/dev/ttyUSB0",{
 
 function log(msg) {
     posix.syslog('info', msg);
-    console.log(msg);
+//    console.log(msg);
 }
 
 
@@ -58,9 +62,14 @@ serialPort.on("open", function () {
 		log("SEND: +CMGR: 0");
 	    }
 	} else if ( result = data.match(/^oper\.mode\ ([^,]+),\ mode\ ([^,]+),\ temp\.actual\ (\d+)\ deg/) ) {
+	    currentOMode = result[1];
+	    currentMode = result[2];
+	    currentTemp = result[3];
 	    eventEmitter.emit('pelletkachel',{operatingmode: result[1], mode: result[2], temperature: result[3]});
 	    lastmode = result[2];	    
 	} else if (result = data.match(/^oper\.mode\ (\S+)\ set\ temp\.set\ (\d+)\ degr\ set/) ) {
+	    currentOMode = result[1];
+	    currentSetTemp = result[2];
 	    eventEmitter.emit('pelletkachel',{operatingmode: result[1], mode: lastmode, settemp: result[2]});
 	} else if ( /^at\+cmgs=\d+$/.test(data) ) {
 	    serialPort.write("+CMGS: 1\rOK\r");
@@ -79,26 +88,47 @@ eventEmitter.on('smscommand',function(data) {
 setInterval(function(){
     log("timed event. queuelength = " + queue.length);
     eventEmitter.emit('smscommand',"***i");    
-},60000);
+},30000);
 
 // start webserver for web control
 app.use(express.static(__dirname + '/public'));
 server.listen(8080);
 
+function emitstate(socket) {
+    socket.emit('pelletkachel', {operatingmode: currentOMode,mode: currentMode,temperature: currentTemp,settemp: currentSetTemp});
+}
+
 // forward everything to the socket
 io.sockets.on('connection', function (socket) {    
+    emitstate(socket);
+    
     eventEmitter.on('pelletkachel', function(data) {
-	socket.emit('pelletkachel', data);
+	emitstate(socket);
     });
 
     socket.on('settemp', function(data) {
 	console.log("Settemp: " + data.temperature);
-	eventEmitter.emit('smscommand',"***baheat-rt" + data.temperature + "#");
+	var temp = Number(data.temperature).toFixed(0);
+	if ( temp >= 10 && temp < 25 ) {
+	    eventEmitter.emit('smscommand',"***baheat-rt" + temp + "#");
+	    currentSetTemp = temp;
+	}
     });
 
     socket.on('setmode', function(data) {
 	console.log("Setmode: " + data.operatingmode);
-	eventEmitter.emit('smscommand',"***ba" + data.operatingmode.toLowerCase());
+
+	if ( data.operatingmode.toLowerCase() == 'off' ) {
+	    eventEmitter.emit('smscommand',"***baoff#");
+	} else if ( data.operatingmode.toLowerCase() == 'auto' ) {
+	    eventEmitter.emit('smscommand',"***baauto");
+	} else if ( data.operatingmode.toLowerCase() == 'heat' ) {
+	    if ( Number(currentSetTemp) > 0 ) { 
+		eventEmitter.emit('smscommand',"***baheat-rt" + currentSetTemp + "#");
+	    } else if ( Number(currentTemp) > 0 ) { 
+		eventEmitter.emit('smscommand',"***baheat-rt" + currentTemp + "#");
+	    }
+	}
     });
 });
 

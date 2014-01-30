@@ -39,8 +39,6 @@ require([
 	operatingmode_dialog = function(){
 	    var node = registry.byId("pickermode");
 	    var current = document.getElementById("OPERATING_MODE").innerHTML;
-	    while ( node.value < current )
-		node.spin(1);
 	    registry.byId('dlg_operatingmode').show();
 	}
 
@@ -58,7 +56,7 @@ require([
 
 	settemp_dialog = function(){
 	    var node = registry.byId("pickertemp");
-	    var current = document.getElementById("TEMPERATURE").innerHTML;
+	    var current = document.getElementById("SETTEMP").innerHTML;
 	    while ( node.value < current )
 		node.spin(1);
 	    registry.byId('dlg_thermostat').show();
@@ -68,6 +66,7 @@ require([
 	    console.log("set thermostat");
 	    var node = registry.byId("pickertemp");
 	    console.log(node.value);
+	    document.getElementById("SETTEMP").innerHTML = node.value;
 	    socket.emit('settemp',{temperature:node.value});
 	    registry.byId('dlg_thermostat').hide();
 	}
