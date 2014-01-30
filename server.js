@@ -6,7 +6,6 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-var mqtt = require('mqtt');
 var posix = require('posix');
 
 // open syslog
@@ -91,25 +90,17 @@ io.sockets.on('connection', function (socket) {
     eventEmitter.on('pelletkachel', function(data) {
 	socket.emit('pelletkachel', data);
     });
+
+    socket.on('settemp', function(data) {
+	console.log("Settemp: " + data.temperature);
+	eventEmitter.emit('smscommand',"***baheat-rt" + data.temperature + "#");
+    });
+
+    socket.on('setmode', function(data) {
+	console.log("Setmode: " + data.operatingmode);
+	eventEmitter.emit('smscommand',"***ba" + data.operatingmode.toLowerCase());
+    });
 });
 
-
-// mqtt client to connect to home monitoring bus
-var mqttclient = mqtt.createClient(1883, '192.168.1.44');
-mqttclient.subscribe('CVSETTEMP');
-
-mqttclient.on('message', function (topic, message) {
-    log("received message in topic: " + topic);
-    if ( topic == 'CVSETTEMP' ) {
-	var obj = JSON.parse(message);
-	var tempset = Math.round(obj.setpoint_tuinkamer);
-	eventEmitter.emit('smscommand',"***baheat-rt" + tempset + '#');
-    }
-});
-
-eventEmitter.on('pelletkachel', function(data) {
-    mqttclient.publish('PELLETKACHEL',JSON.stringify(data));
-});
-        
 
 
