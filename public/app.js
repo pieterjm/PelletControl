@@ -1,3 +1,10 @@
+var ellookup = {
+    'operatingmode' : 'OPERATING_MODE',
+    'temperature':  'TEMPERATURE',
+    'mode': 'MODE',
+    'settemp': 'SETTEMP'
+};
+
 require([
     "dojo/_base/connect",
     "dojo/_base/window",
@@ -21,9 +28,13 @@ require([
     ready(function(){
 	var socket = io.connect();
 	socket.on("pelletkachel",function(msg) {
-	    document.getElementById("TEMPERATURE").innerHTML = msg['temperature'];
-	    document.getElementById("OPERATING_MODE").innerHTML = msg['operatingmode'];
-	    document.getElementById("MODE").innerHTML = msg['mode'];
+	    
+	    for (var key in msg ) {
+		var el = document.getElementById(ellookup[key]);
+		if ( el ) {		    
+		    el.innerHTML = msg[key];
+		}
+	    }
 	});	
     });
 });

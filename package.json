@@ -15,7 +15,8 @@
   "dependencies": {
     "serialport": "~1.2.5",
     "socket.io": "~0.9.16",
-    "express":"~3.4.7"
+    "express":"~3.4.7",
+    "mqtt":"~0.3.7"
   }
 }
 
