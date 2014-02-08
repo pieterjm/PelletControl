@@ -27,6 +27,11 @@ mqttclient.on('connect', function() {
    });
    mqttclient.on('close',function() {
    });
+   eventEmitter.on('pelletkachel', function(data) {
+	mqttclient.publish("PELLETKACHEL",JSON.stringify({operatingmode: currentOMode,mode: currentMode,temperature: currentTemp,settemp: currentSetTemp}));
+   });
+
+
 });
 mqttclient.options.reconnectPeriod = 1000; 
 
