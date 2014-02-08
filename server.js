@@ -48,7 +48,7 @@ var serialPort = new SerialPort("/dev/ttyUSB0",{
 
 function log(msg) {
     posix.syslog('info', msg);
-    console.log(msg);
+//    console.log(msg);
 }
 
 

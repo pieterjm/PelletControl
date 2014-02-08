@@ -1,3 +1,3 @@
 #!/bin/sh
-cd /home/pieter/PelletControl
+cd /home/pelletcontrol/PelletControl
 screen -d -m node server.js
