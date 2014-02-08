@@ -7,10 +7,28 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var posix = require('posix');
+var mqtt = require('mqtt');
 
 // open syslog
 posix.openlog('pelletcontrol', { cons: true, ndelay: true, pid: true }, 'local0');
 posix.syslog('info', 'pelletcontrol started');
+
+
+var mqttclient = mqtt.createClient(1883,"192.168.1.44",{ clientId: "MQTTPELLET"} );
+mqttclient.on('connect', function() {
+   log('MQTT connected');
+   mqttclient.subscribe("CVSETTEMP");
+   mqttclient.on('message', function(topic, message) {	
+      log('MQTT message: ' + topic);
+      var obj = JSON.parse(message);
+      var setpoint = Number(obj["setpoint_tuinkamer"]).toFixed(0);
+      eventEmitter.emit('smscommand',"***baheat-rt" + setpoint + "#");
+      currentSetTemp = setpoint;
+   });
+   mqttclient.on('close',function() {
+   });
+});
+mqttclient.options.reconnectPeriod = 1000; 
 
 
 var currentTemp = "--";
@@ -30,7 +48,7 @@ var serialPort = new SerialPort("/dev/ttyUSB0",{
 
 function log(msg) {
     posix.syslog('info', msg);
-//    console.log(msg);
+    console.log(msg);
 }
 
 
